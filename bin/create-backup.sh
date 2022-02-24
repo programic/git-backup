@@ -11,7 +11,9 @@ bitbucket() {
   : ${BITBUCKET_PASSWORD?"You need to set the BITBUCKET_PASSWORD environment variable."}
   : ${BITBUCKET_WORKSPACE?"You need to set the BITBUCKET_WORKSPACE environment variable."}
 
-  mkdir -p /backup/bitbucket
+  backup_base="/backup/bitbucket"
+
+  mkdir -p "${backup_base}"
 
   info "Gathering information from Bitbucket"
 
@@ -31,13 +33,13 @@ bitbucket() {
     project_name=$(basename "${repository}")
     project_name="${project_name%.*}"
 
-    backup_folder="/backup/bitbucket/${project_name}"
+    backup_folder="${backup_base}/${project_name}"
     if [[ -d "${backup_folder}" ]]; then
       info "Pull repository ${project_name}"
       (cd "${backup_folder}" && git pull --all)
     else
       info "Clone repository ${project_name}"
-      (cd /backup/bitbucket && git clone "${repository}")
+      (cd "${backup_base}" && git clone "${repository}")
     fi
 
     success "Backup of repository ${project_name} is successfully created"
@@ -48,7 +50,9 @@ github() {
   : ${GITHUB_ORGANISATION?"You need to set the GITHUB_ORGANISATION environment variable."}
   : ${GITHUB_TOKEN?"You need to set the GITHUB_TOKEN environment variable."}
 
-  mkdir -p /backup/github
+  backup_base="/backup/github"
+
+  mkdir -p "${backup_base}"
 
   info "Gathering information from GitHub"
 
@@ -68,13 +72,13 @@ github() {
     project_name=$(basename "${repository}")
     project_name="${project_name%.*}"
 
-    backup_folder="/backup/github/${project_name}"
+    backup_folder="${backup_base}/${project_name}"
     if [[ -d "${backup_folder}" ]]; then
       info "Pull repository ${project_name}"
       (cd "${backup_folder}" && git pull --all)
     else
       info "Clone repository ${project_name}"
-      (cd /backup/github && git clone "${repository}")
+      (cd "${backup_base}" && git clone "${repository}")
     fi
 
     success "Backup of repository ${project_name} is successfully created"
