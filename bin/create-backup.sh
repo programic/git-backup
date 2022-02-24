@@ -13,14 +13,12 @@ bitbucket() {
 
   mkdir -p /backup/bitbucket
 
-  # Grep all repository information from Bitbucket
   info "Gathering information from Bitbucket"
 
   for i in {1..2}; do
     curl -s -u ${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD} "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}?pagelen=100&page=${i}" > /tmp/bitbucket-${i}.json
   done
 
-  # Collect all repositories. [0].href will return the https link and [1].href the ssh link
   info "List all repositories"
   repositories=$(cat /tmp/bitbucket-*.json | jq -r '.values[] | .links.clone[0].href')
 
@@ -52,14 +50,12 @@ github() {
 
   mkdir -p /backup/github
 
-  # Grep all repository information from GitHub
   info "Gathering information from GitHub"
 
   for i in {1..2}; do
     curl -u token:${GITHUB_TOKEN} "https://api.github.com/orgs/${GITHUB_ORGANISATION}/repos?per_page=100&page=${i}" > /tmp/github-${i}.json
   done
 
-  # Collect all repositories. [0].href will return the https link and [1].href the ssh link
   info "List all repositories"
   repositories=$(cat /tmp/github-*.json | jq -r '.[] | .clone_url')
 
