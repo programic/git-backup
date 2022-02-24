@@ -11,6 +11,8 @@ bitbucket() {
   : ${BITBUCKET_PASSWORD?"You need to set the BITBUCKET_PASSWORD environment variable."}
   : ${BITBUCKET_WORKSPACE?"You need to set the BITBUCKET_WORKSPACE environment variable."}
 
+  mkdir -p /backup/bitbucket
+
   # Grep all repository information from Bitbucket
   info "Gathering information from Bitbucket"
 
@@ -47,6 +49,8 @@ bitbucket() {
 github() {
   : ${GITHUB_ORGANISATION?"You need to set the GITHUB_ORGANISATION environment variable."}
   : ${GITHUB_TOKEN?"You need to set the GITHUB_TOKEN environment variable."}
+
+  mkdir -p /backup/github
 
   # Grep all repository information from GitHub
   info "Gathering information from GitHub"
