@@ -6,6 +6,25 @@ set -o pipefail
 # Include common.sh script
 source "$(dirname "${0}")/common.sh"
 
+clone_or_pull() {
+  for repository in ${1}; do
+    project_name=$(basename "${repository}")
+    project_name="${project_name%.*}"
+
+    backup_folder="${2}/${project_name}"
+    if [[ -d "${backup_folder}" ]]; then
+      info "Pull repository ${project_name}"
+      # Use `-c core.fileMode=false` to ignore permission changes. Some NAS devices can change the permissions after download.
+      (cd "${backup_folder}" && git -c core.fileMode=false pull --all || true)
+    else
+      info "Clone repository ${project_name}"
+      (cd "${2}" && git clone "${repository}" || true)
+    fi
+
+    success "Backup of repository ${project_name} is successfully created"
+  done
+}
+
 bitbucket() {
   : ${BITBUCKET_USERNAME?"You need to set the BITBUCKET_USERNAME environment variable."}
   : ${BITBUCKET_PASSWORD?"You need to set the BITBUCKET_PASSWORD environment variable."}
@@ -29,21 +48,7 @@ bitbucket() {
 
   rm /tmp/*
 
-  for repository in ${repositories}; do
-    project_name=$(basename "${repository}")
-    project_name="${project_name%.*}"
-
-    backup_folder="${backup_base}/${project_name}"
-    if [[ -d "${backup_folder}" ]]; then
-      info "Pull repository ${project_name}"
-      (cd "${backup_folder}" && git pull --all)
-    else
-      info "Clone repository ${project_name}"
-      (cd "${backup_base}" && git clone "${repository}")
-    fi
-
-    success "Backup of repository ${project_name} is successfully created"
-  done
+  clone_or_pull "${repositories}" "${backup_base}"
 }
 
 github() {
@@ -57,7 +62,7 @@ github() {
   info "Gathering information from GitHub"
 
   for i in {1..2}; do
-    curl -u token:${GITHUB_TOKEN} "https://api.github.com/orgs/${GITHUB_ORGANISATION}/repos?per_page=100&page=${i}" > /tmp/github-${i}.json
+    curl -s -u token:${GITHUB_TOKEN} "https://api.github.com/orgs/${GITHUB_ORGANISATION}/repos?per_page=100&page=${i}" > /tmp/github-${i}.json
   done
 
   info "List all repositories"
@@ -68,21 +73,7 @@ github() {
 
   rm /tmp/*
 
-  for repository in ${repositories}; do
-    project_name=$(basename "${repository}")
-    project_name="${project_name%.*}"
-
-    backup_folder="${backup_base}/${project_name}"
-    if [[ -d "${backup_folder}" ]]; then
-      info "Pull repository ${project_name}"
-      (cd "${backup_folder}" && git pull --all)
-    else
-      info "Clone repository ${project_name}"
-      (cd "${backup_base}" && git clone "${repository}")
-    fi
-
-    success "Backup of repository ${project_name} is successfully created"
-  done
+  clone_or_pull "${repositories}" "${backup_base}"
 }
 
 if [[ -n "${BITBUCKET_PASSWORD}" ]]; then
